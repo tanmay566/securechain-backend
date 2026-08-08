@@ -1,4 +1,4 @@
-import hashlib, json, time
+import hashlib, json, time, os
 
     
 class Block:
