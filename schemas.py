@@ -7,7 +7,7 @@ class AssetCreate(BaseModel):
     asset_id:str
     asset_type :str
     registration_datetime : str 
-    temp_constraint: Optional[Temp_constraint] 
+    temp_constraint: Optional[temp_constraint] 
     manufacturer : Optional[str] = None
     manufacturing_date: Optional[date] = None
     expiry: Optional[date] = None
