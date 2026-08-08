@@ -2,6 +2,11 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, date
 
+class Temp_constraint(BaseModel):
+    min_temp = float
+    max_temp = float
+    
+
 class AssetCreate(BaseModel):
     name: str
     asset_id:str
@@ -13,8 +18,5 @@ class AssetCreate(BaseModel):
     expiry: Optional[date] = None
     origin: Optional[str] = None
 
-class Temp_constraint(BaseModel):
-    min_temp = float
-    max_temp = float
-    
+
     
