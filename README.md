@@ -150,8 +150,8 @@ Reload that asset's status page (or `curl http://localhost:8000/assets/YOUR-ASSE
 ## Credits
 
 This project was built collaboratively for a hackathon by:
-- **Atman** ([@atman-onit](https://github.com/atman-onit)) — backend (FastAPI, blockchain/SimpleChain implementation, database, API integration)
-- **Tanmay** ([@tanmay566](https://github.com/tanmay566)) — original repository, backend, database management, API integration
+- **Tanmay** ([@tanmay566](https://github.com/tanmay566)) — original repository, backend, database management, API integration, blockchain
+- **Atman** ([@atman-onit](https://github.com/atman-onit)) — backend (FastAPI, blockchain/SimpleChain implementation, database, API integration
 - **[Rishabh and Aashu** — frontend (React/Vite UI)
 
 Original repository: [tanmay566/securechain-backend](https://github.com/tanmay566/securechain-backend)
