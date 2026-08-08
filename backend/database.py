@@ -4,21 +4,19 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 
-# Load variables from .env
 load_dotenv()
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Create the engine
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# SQLite needs this extra arg; other databases (Postgres) don't
+connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
 
-# Create a session factory
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for our database models
 Base = declarative_base()
 
-# Dependency to get a database session in our API routes
 def get_db():
     db = SessionLocal()
     try:

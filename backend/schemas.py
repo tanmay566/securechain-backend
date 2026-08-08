@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 
+
 class AssetCreate(BaseModel):
     name: str
     full_name: Optional[str] = None
@@ -22,3 +23,13 @@ class AssetCreate(BaseModel):
     dispatch_date: Optional[str] = None
     expected_delivery: Optional[str] = None
     status: Optional[str] = "Registered"
+
+
+class EventCreate(BaseModel):
+    event_type: str
+    org: str
+    detail: dict = {}
+
+
+class TempReading(BaseModel):
+    temperature: float

@@ -1,11 +1,11 @@
 import hashlib, json, time, os
 
-    
+
 class Block:
     def __init__(self, index: int, data: dict, prev_hash: str, timestamp: float = None):
         self.index = index
         self.timestamp = timestamp or time.time()
-        self.data = data #passed in dict/json format
+        self.data = data  # passed in dict/json format
         self.prev_hash = prev_hash
         self.hash = self.compute_hash()
 
@@ -16,7 +16,7 @@ class Block:
             "data": self.data,
             "prev_hash": self.prev_hash
         }, sort_keys=True)
-        return hashlib.sha256(block_string.encode()).hexdigest() #hash
+        return hashlib.sha256(block_string.encode()).hexdigest()  # hash
 
     def to_dict(self) -> dict:
         return {
@@ -32,7 +32,6 @@ class Block:
         block = Block(d["index"], d["data"], d["prev_hash"], d["timestamp"])
         block.hash = d["hash"]  # trust stored hash when loading; is_valid() will catch tampering
         return block
-  
 
 
 class Blockchain:
@@ -85,47 +84,45 @@ class Blockchain:
             raw = json.load(f)
         self.chain = [Block.from_dict(b) for b in raw]
 
-def verify_asset(self, asset_id: str, current_snapshot_by_event_type: dict) -> dict:
-    """
-    current_snapshot_by_event_type: dict mapping event_type -> the
-    freshly-rebuilt snapshot dict for that event, computed from CURRENT
-    database state by the caller. We recompute its hash and compare
-    against what's stored on-chain for that event.
-    """
-    if not self.is_valid():
-        return {
-            "valid": False,
-            "reason": "Chain structure is broken (hash links don't match)",
-        }
-
-    for block in self.chain:
-        if block.data.get("asset_id") != asset_id:
-            continue
-
-        event_type = block.data.get("event_type")
-        current_snapshot = current_snapshot_by_event_type.get(event_type)
-
-        if current_snapshot is None:
-            continue  # caller didn't supply a snapshot to check for this event type
-
-        recomputed_hash = hashlib.sha256(
-            json.dumps(current_snapshot, sort_keys=True, default=str).encode()
-        ).hexdigest()
-
-        stored_hash = block.data.get("record_hash")
-
-        if recomputed_hash != stored_hash:
+    def verify_asset(self, asset_id: str, current_snapshot_by_event_type: dict) -> dict:
+        """
+        current_snapshot_by_event_type: dict mapping event_type -> the
+        freshly-rebuilt snapshot dict for that event, computed from CURRENT
+        database state by the caller. We recompute its hash and compare
+        against what's stored on-chain for that event.
+        """
+        if not self.is_valid():
             return {
                 "valid": False,
-                "reason": f"Data for event '{event_type}' has been altered since it was recorded",
-                "failed_event_type": event_type,
-                "failed_block_index": block.index,
+                "reason": "Chain structure is broken (hash links don't match)",
             }
 
-    return {"valid": True, "reason": "All recorded events match their on-chain proof"}
+        for block in self.chain:
+            if block.data.get("asset_id") != asset_id:
+                continue
+
+            event_type = block.data.get("event_type")
+            current_snapshot = current_snapshot_by_event_type.get(event_type)
+
+            if current_snapshot is None:
+                continue  # caller didn't supply a snapshot to check for this event type
+
+            recomputed_hash = hashlib.sha256(
+                json.dumps(current_snapshot, sort_keys=True, default=str).encode()
+            ).hexdigest()
+
+            stored_hash = block.data.get("record_hash")
+
+            if recomputed_hash != stored_hash:
+                return {
+                    "valid": False,
+                    "reason": f"Data for event '{event_type}' has been altered since it was recorded",
+                    "failed_event_type": event_type,
+                    "failed_block_index": block.index,
+                }
+
+        return {"valid": True, "reason": "All recorded events match their on-chain proof"}
+
 
 blockchain = Blockchain()
 blockchain.load_chain()
-
-
-

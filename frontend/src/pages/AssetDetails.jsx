@@ -1,4 +1,3 @@
-
 import BrandLogo from "../components/BrandLogo";
 import vitalchainLogo from "../assets/vitalchain-logo.png";
 import {
@@ -22,11 +21,9 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
           <h2 className="text-2xl font-bold text-slate-900 mb-3">
             No Asset Selected
           </h2>
-
           <p className="text-slate-500 mb-5">
             Please go back to the Assets page and select an asset.
           </p>
-
           <button
             onClick={onBackToAssets}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold transition"
@@ -44,187 +41,54 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
     asset.vaccineName ||
     asset.name ||
     "COVISHIELD";
-
   const shortName =
     asset.name ||
     vaccineName.split(" ")[0] ||
     "Vaccine";
-
   const assetId =
     asset.assetId ||
     asset.id ||
     "VC-IND-2026-000981";
-
   const batchNumber =
     asset.batchNumber ||
     "DEMO-COV-260501";
+  const manufacturer = asset.manufacturer || "";
+  const quantity = asset.quantity || "";
+  const manufacturingDate = asset.manufacturingDate || "";
+  const expiryDate = asset.expiryDate || "";
+  const storageRequirement = asset.storageRequirement || "";
+  const manufacturingAddress = asset.manufacturingAddress || "";
+  const shipmentId = asset.shipmentId || "";
+  const transportMode = asset.transportMode || "";
+  const origin = asset.origin || "";
+  const destination = asset.destination || "";
+  const vehicleNumber = asset.vehicleNumber || "";
+  const driver = asset.driver || "";
+  const dispatchDate = asset.dispatchDate || "";
+  const expectedDelivery = asset.expectedDelivery || "";
 
-  const manufacturer =
-    asset.manufacturer ||
-    "Serum Institute of India Pvt. Ltd.";
-
-  const manufacturingAddress =
-    asset.manufacturingAddress ||
-    "212/2, Hadapsar, Off Soli Poonawalla Road, Pune – 411028, Maharashtra, India";
-
-  const manufacturingDate =
-    asset.manufacturingDate ||
-    "01 May 2026";
-
-  const expiryDate =
-    asset.expiryDate ||
-    "31 October 2026";
-
-  const storageRequirement =
-    asset.storageRequirement ||
-    asset.storage ||
-    "2°C – 8°C";
-
-  const quantity =
-    asset.quantity ||
-    "500 Vials";
-
-  const shipmentId =
-    asset.shipmentId ||
-    "VTC-SHP-2026-00142";
-
-  const origin =
-    asset.origin ||
-    "Serum Institute of India, Pune, Maharashtra";
-
-  const destination =
-    asset.destination ||
-    "AIIMS New Delhi, Ansari Nagar, New Delhi – 110029";
-
-  const transportMode =
-    asset.transportMode ||
-    "Temperature-controlled road transport";
-
-  const vehicleNumber =
-    asset.vehicleNumber ||
-    "MH-12-AB-4582";
-
-  const driver =
-    asset.driver ||
-    "Ramesh Kumar";
-
-  const dispatchDate =
-    asset.dispatchDate ||
-    "05 May 2026 — 08:30 AM";
-
-  const expectedDelivery =
-    asset.expectedDelivery ||
-    "07 May 2026 — 02:00 PM";
+  // Dynamic status — no longer hardcoded to "Delivered"
+  const status = asset.status || "Registered";
+  const verified = asset.verified !== undefined ? asset.verified : true;
+  const latestHash = asset.latestHash || null;
+  const timeline = asset.timeline || [];
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-slate-50">
 
       {/* =========================================================
           HEADER
       ========================================================= */}
 
-      <header className="w-full h-[68px] bg-white border-b border-slate-200 flex items-center px-6">
+      <header className="h-[68px] bg-white border-b border-slate-200 flex items-center px-6">
 
-        {/* LOGO */}
-
-<div className="w-[270px] h-[64px] shrink-0 flex items-center">
-  <img
-    src={vitalchainLogo}
-    alt="VITALChain"
-    className="h-[166px] w-auto object-contain"
-  />
-</div>
-
-        {/* NAVIGATION */}
-
-        <nav className="flex items-center gap-2 ml-8">
-
-          {/* Dashboard */}
-
-          <button
-            onClick={onDashboardClick}
-            className="
-              px-5 py-2.5
-              rounded-full
-              text-base
-              font-medium
-              text-slate-600
-              hover:bg-slate-100
-              hover:text-blue-600
-              transition-all
-              duration-200
-            "
-          >
-            Dashboard
-          </button>
-
-
-          {/* Assets */}
-
-          <button
-            onClick={onBackToAssets}
-            className="
-              px-5 py-2.5
-              rounded-full
-              bg-blue-50
-              text-blue-600
-              text-base
-              font-semibold
-              transition
-            "
-          >
-            Assets
-          </button>
-
-        </nav>
-
-
-        {/* SEARCH */}
-
-        <div className="flex-1 ml-8 mr-8">
-
-          <div className="relative w-full max-w-[700px]">
-
-            <Package
-              size={20}
-              className="
-                absolute
-                left-4
-                top-1/2
-                -translate-y-1/2
-                text-slate-400
-              "
-            />
-
-            <input
-              type="text"
-              placeholder="Search assets, shipments..."
-              className="
-                w-full
-                h-11
-                pl-12
-                pr-4
-                bg-white
-                border
-                border-slate-200
-                rounded-xl
-                text-base
-                text-slate-700
-                placeholder:text-slate-400
-                outline-none
-                focus:border-blue-500
-                focus:ring-2
-                focus:ring-blue-500/10
-                transition
-              "
-            />
-
-          </div>
-
+        <div className="w-[270px] h-[64px] shrink-0 flex items-center">
+          <img
+            src={vitalchainLogo}
+            alt="VITALChain"
+            className="h-[166px] w-auto object-contain"
+          />
         </div>
-
-
-        {/* RIGHT SIDE */}
 
         <div className="ml-auto flex items-center gap-5 shrink-0">
 
@@ -285,7 +149,6 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
           "
         >
           <ArrowLeft size={19} />
-
           Back to Assets
         </button>
 
@@ -304,7 +167,7 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
                 {shortName}
               </h1>
 
-              {/* DELIVERED BADGE */}
+              {/* STATUS BADGE — now dynamic */}
 
               <span className="
                 inline-flex
@@ -319,36 +182,32 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
                 text-base
               ">
                 <CheckCircle2 size={18} />
-
-                Delivered
+                {status}
               </span>
 
             </div>
-
 
             <p className="text-lg text-slate-500 mt-2">
               {vaccineName} • Vaccine Asset
             </p>
 
-
-            <div className="
+            <div className={`
               flex
               items-center
               gap-2
               mt-3
               text-sm
-              text-emerald-600
               font-semibold
-            ">
+              ${verified ? "text-emerald-600" : "text-red-600"}
+            `}>
               <ShieldCheck size={17} />
-
-              Verified on blockchain
+              {verified ? "Verified on blockchain" : "Verification failed"}
             </div>
 
           </div>
 
 
-          {/* CURRENT STATUS */}
+          {/* CURRENT STATUS — now dynamic */}
 
           <div className="
             flex
@@ -379,15 +238,12 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
             </div>
 
             <div>
-
               <p className="text-sm text-slate-500">
                 Current Shipment Status
               </p>
-
               <p className="text-lg font-bold text-emerald-600">
-                Successfully Delivered
+                {status}
               </p>
-
             </div>
 
           </div>
@@ -442,20 +298,17 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
                   </div>
 
                   <div>
-
                     <h2 className="text-xl font-bold text-slate-900">
                       Vaccine Details
                     </h2>
-
                     <p className="text-sm text-slate-500">
                       Registered asset information
                     </p>
-
                   </div>
 
                 </div>
 
-
+                {/* status badge — now dynamic */}
                 <span className="
                   px-3
                   py-1.5
@@ -465,7 +318,7 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
                   text-sm
                   font-semibold
                 ">
-                  Delivered
+                  {status}
                 </span>
 
               </div>
@@ -475,49 +328,19 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
 
-                <DetailItem
-                  label="Vaccine Name"
-                  value={vaccineName}
-                />
+                <DetailItem label="Vaccine Name" value={vaccineName} />
+                <DetailItem label="Asset ID" value={assetId} />
+                <DetailItem label="Batch Number" value={batchNumber} />
+                <DetailItem label="Manufacturer" value={manufacturer} />
+                <DetailItem label="Quantity" value={quantity} />
+                <DetailItem label="Manufacturing Date" value={manufacturingDate} />
+                <DetailItem label="Expiry Date" value={expiryDate} />
+                <DetailItem label="Storage Requirement" value={storageRequirement} />
 
-                <DetailItem
-                  label="Asset ID"
-                  value={assetId}
-                />
-
-                <DetailItem
-                  label="Batch Number"
-                  value={batchNumber}
-                />
-
-                <DetailItem
-                  label="Manufacturer"
-                  value={manufacturer}
-                />
-
-                <DetailItem
-                  label="Quantity"
-                  value={quantity}
-                />
-
-                <DetailItem
-                  label="Manufacturing Date"
-                  value={manufacturingDate}
-                />
-
-                <DetailItem
-                  label="Expiry Date"
-                  value={expiryDate}
-                />
-
-                <DetailItem
-                  label="Storage Requirement"
-                  value={storageRequirement}
-                />
-
+                {/* status — now dynamic */}
                 <DetailItem
                   label="Asset Status"
-                  value="Delivered"
+                  value={status}
                   valueClass="text-emerald-600"
                 />
 
@@ -527,25 +350,12 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
               {/* MANUFACTURING ADDRESS */}
 
               <div className="mt-7 pt-6 border-t border-slate-100">
-
-                <p className="
-                  text-sm
-                  font-semibold
-                  text-slate-500
-                  mb-2
-                ">
+                <p className="text-sm font-semibold text-slate-500 mb-2">
                   Manufacturing Address
                 </p>
-
-                <p className="
-                  text-base
-                  font-medium
-                  text-slate-800
-                  leading-relaxed
-                ">
+                <p className="text-base font-medium text-slate-800 leading-relaxed">
                   {manufacturingAddress}
                 </p>
-
               </div>
 
             </section>
@@ -584,19 +394,15 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
                   </div>
 
                   <div>
-
                     <h2 className="text-xl font-bold text-slate-900">
                       Temperature Monitoring
                     </h2>
-
                     <p className="text-sm text-slate-500">
                       Cold-chain storage verification
                     </p>
-
                   </div>
 
                 </div>
-
 
                 <span className="
                   flex
@@ -606,86 +412,33 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
                   font-semibold
                   text-sm
                 ">
-                  <span className="
-                    w-2.5
-                    h-2.5
-                    rounded-full
-                    bg-emerald-500
-                  "></span>
-
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                   Within Safe Range
                 </span>
 
               </div>
 
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                {/* SAFE RANGE */}
-
-                <div className="
-                  rounded-xl
-                  bg-slate-50
-                  border
-                  border-slate-200
-                  p-5
-                ">
-
-                  <p className="
-                    text-sm
-                    text-slate-500
-                    font-medium
-                  ">
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-5">
+                  <p className="text-sm text-slate-500 font-medium">
                     Safe Temperature Range
                   </p>
-
-                  <p className="
-                    text-3xl
-                    font-bold
-                    text-slate-900
-                    mt-2
-                  ">
+                  <p className="text-3xl font-bold text-slate-900 mt-2">
                     {storageRequirement}
                   </p>
-
                 </div>
 
-
-                {/* STATUS */}
-
-                <div className="
-                  rounded-xl
-                  bg-emerald-50
-                  border
-                  border-emerald-100
-                  p-5
-                ">
-
-                  <p className="
-                    text-sm
-                    text-emerald-700
-                    font-medium
-                  ">
+                <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-5">
+                  <p className="text-sm text-emerald-700 font-medium">
                     Temperature Status
                   </p>
-
                   <div className="flex items-center gap-2 mt-2">
-
-                    <CheckCircle2
-                      size={24}
-                      className="text-emerald-600"
-                    />
-
-                    <p className="
-                      text-xl
-                      font-bold
-                      text-emerald-700
-                    ">
+                    <CheckCircle2 size={24} className="text-emerald-600" />
+                    <p className="text-xl font-bold text-emerald-700">
                       Safe
                     </p>
-
                   </div>
-
                 </div>
 
               </div>
@@ -707,85 +460,28 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
             ">
 
               <div className="flex items-center gap-3 mb-7">
-
-                <div className="
-                  w-11
-                  h-11
-                  rounded-xl
-                  bg-indigo-50
-                  flex
-                  items-center
-                  justify-center
-                ">
-                  <Truck
-                    size={23}
-                    className="text-indigo-600"
-                  />
+                <div className="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center">
+                  <Truck size={23} className="text-indigo-600" />
                 </div>
-
                 <div>
-
                   <h2 className="text-xl font-bold text-slate-900">
                     Shipment Information
                   </h2>
-
                   <p className="text-sm text-slate-500">
                     Delivery and transportation details
                   </p>
-
                 </div>
-
               </div>
 
-
-              <div className="
-                grid
-                grid-cols-1
-                md:grid-cols-2
-                gap-x-10
-                gap-y-6
-              ">
-
-                <DetailItem
-                  label="Shipment ID"
-                  value={shipmentId}
-                />
-
-                <DetailItem
-                  label="Transport Mode"
-                  value={transportMode}
-                />
-
-                <DetailItem
-                  label="Origin"
-                  value={origin}
-                />
-
-                <DetailItem
-                  label="Destination"
-                  value={destination}
-                />
-
-                <DetailItem
-                  label="Vehicle Number"
-                  value={vehicleNumber}
-                />
-
-                <DetailItem
-                  label="Driver"
-                  value={driver}
-                />
-
-                <DetailItem
-                  label="Dispatch Date"
-                  value={dispatchDate}
-                />
-
-                <DetailItem
-                  label="Expected Delivery"
-                  value={expectedDelivery}
-                />
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+                <DetailItem label="Shipment ID" value={shipmentId} />
+                <DetailItem label="Transport Mode" value={transportMode} />
+                <DetailItem label="Origin" value={origin} />
+                <DetailItem label="Destination" value={destination} />
+                <DetailItem label="Vehicle Number" value={vehicleNumber} />
+                <DetailItem label="Driver" value={driver} />
+                <DetailItem label="Dispatch Date" value={dispatchDate} />
+                <DetailItem label="Expected Delivery" value={expectedDelivery} />
               </div>
 
             </section>
@@ -801,86 +497,70 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
 
 
             {/* =================================================
-                AUTHENTIC ASSET
+                AUTHENTIC ASSET / VERIFICATION + HASH
             ================================================= */}
 
-            <section className="
+            <section className={`
               bg-white
               border
-              border-emerald-200
               rounded-2xl
               shadow-sm
               p-7
-            ">
+              ${verified ? "border-emerald-200" : "border-red-200"}
+            `}>
 
-              <div className="
-                flex
-                flex-col
-                items-center
-                text-center
-              ">
+              <div className="flex flex-col items-center text-center">
 
-                <div className="
+                <div className={`
                   w-16
                   h-16
                   rounded-full
-                  bg-emerald-50
                   flex
                   items-center
                   justify-center
                   mb-4
-                ">
+                  ${verified ? "bg-emerald-50" : "bg-red-50"}
+                `}>
                   <ShieldCheck
                     size={34}
-                    className="text-emerald-600"
+                    className={verified ? "text-emerald-600" : "text-red-600"}
                   />
                 </div>
 
                 <h2 className="text-xl font-bold text-slate-900">
-                  Authentic Asset
+                  {verified ? "Authentic Asset" : "Verification Failed"}
                 </h2>
 
                 <p className="text-slate-500 mt-1">
-                  Verified on blockchain
+                  {verified ? "Verified on blockchain" : "Data may have been altered"}
                 </p>
 
-
-                <div className="
-                  w-full
-                  mt-6
-                  bg-slate-50
-                  rounded-xl
-                  p-4
-                  text-left
-                ">
-
-                  <p className="
-                    text-xs
-                    font-semibold
-                    text-slate-500
-                    uppercase
-                    tracking-wide
-                  ">
+                <div className="w-full mt-6 bg-slate-50 rounded-xl p-4 text-left">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                     Verification Status
                   </p>
-
                   <div className="flex items-center gap-2 mt-2">
-
                     <CheckCircle2
                       size={18}
-                      className="text-emerald-600"
+                      className={verified ? "text-emerald-600" : "text-red-600"}
                     />
-
-                    <span className="
-                      font-semibold
-                      text-emerald-600
-                    ">
-                      Verified & Delivered
+                    <span className={`font-semibold ${verified ? "text-emerald-600" : "text-red-600"}`}>
+                      {verified ? "Verified & Up To Date" : "Tampering Detected"}
                     </span>
-
                   </div>
-
                 </div>
+
+                {/* LATEST BLOCK HASH */}
+                {latestHash && (
+                  <div className="w-full mt-4 bg-slate-50 rounded-xl p-4 text-left">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                      Latest Block Hash
+                    </p>
+                    <p className="font-mono text-xs text-slate-700 mt-2 break-all">
+                      {latestHash}
+                    </p>
+                  </div>
+                )}
 
               </div>
 
@@ -888,7 +568,7 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
 
 
             {/* =================================================
-                SHIPMENT TRACKING
+                SHIPMENT TRACKING — now dynamic timeline
             ================================================= */}
 
             <section className="
@@ -901,130 +581,42 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
             ">
 
               <div className="flex items-center gap-3 mb-6">
-
-                <div className="
-                  w-11
-                  h-11
-                  rounded-xl
-                  bg-blue-50
-                  flex
-                  items-center
-                  justify-center
-                ">
-                  <Truck
-                    size={23}
-                    className="text-blue-600"
-                  />
+                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Truck size={23} className="text-blue-600" />
                 </div>
-
                 <div>
-
                   <h2 className="text-xl font-bold text-slate-900">
                     Shipment Tracking
                   </h2>
-
                   <p className="text-sm text-slate-500">
-                    Delivery completed
+                    {timeline.length} event{timeline.length === 1 ? "" : "s"} recorded on-chain
                   </p>
-
                 </div>
-
               </div>
 
-
-              {/* PROGRESS */}
-
-              <div className="mb-7">
-
-                <div className="flex justify-between mb-2">
-
-                  <span className="
-                    text-sm
-                    font-medium
-                    text-slate-600
-                  ">
-                    Shipment Progress
-                  </span>
-
-                  <span className="
-                    text-sm
-                    font-bold
-                    text-emerald-600
-                  ">
-                    100% Completed
-                  </span>
-
-                </div>
-
-
-                <div className="
-                  w-full
-                  h-2
-                  bg-emerald-100
-                  rounded-full
-                  overflow-hidden
-                ">
-                  <div className="
-                    w-full
-                    h-full
-                    bg-emerald-500
-                    rounded-full
-                  "></div>
-                </div>
-
-              </div>
-
-
-              {/* TIMELINE */}
+              {/* TIMELINE — built from real blockchain event history */}
 
               <div className="relative ml-2">
 
-                {/* LINE */}
+                {timeline.length > 0 && (
+                  <div className="absolute left-[11px] top-3 bottom-3 w-0.5 bg-emerald-200"></div>
+                )}
 
-                <div className="
-                  absolute
-                  left-[11px]
-                  top-3
-                  bottom-3
-                  w-0.5
-                  bg-emerald-200
-                "></div>
-
-
-                <TimelineStep
-                  title="Shipment Registered"
-                  subtitle="Completed • 05 May 2026, 08:30 AM"
-                  completed
-                />
-
-
-                <TimelineStep
-                  title="Dispatched from Serum Institute"
-                  subtitle="Completed • 05 May 2026"
-                  completed
-                />
-
-
-                <TimelineStep
-                  title="In Transit"
-                  subtitle="Completed • Temperature-controlled transport"
-                  completed
-                />
-
-
-                <TimelineStep
-                  title="Arrived at AIIMS New Delhi"
-                  subtitle="Completed • 07 May 2026, 02:00 PM"
-                  completed
-                />
-
-
-                <TimelineStep
-                  title="Delivered"
-                  subtitle="Successfully delivered to destination"
-                  completed
-                  current
-                />
+                {timeline.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    No events recorded yet.
+                  </p>
+                ) : (
+                  timeline.map((step, index) => (
+                    <TimelineStep
+                      key={index}
+                      title={step.title}
+                      subtitle={step.subtitle}
+                      completed={step.completed}
+                      current={index === timeline.length - 1}
+                    />
+                  ))
+                )}
 
               </div>
 
@@ -1035,80 +627,39 @@ function AssetDetails({ asset, onBackToAssets, onDashboardClick }) {
                 DESTINATION
             ================================================= */}
 
-            <section className="
-              bg-blue-600
-              rounded-2xl
-              shadow-lg
-              shadow-blue-600/20
-              p-7
-              text-white
-            ">
-
-              <div className="flex items-start gap-4">
-
-                <div className="
-                  w-11
-                  h-11
-                  rounded-xl
-                  bg-white/15
-                  flex
-                  items-center
-                  justify-center
-                  shrink-0
-                ">
-                  <MapPin size={23} />
-                </div>
-
-                <div>
-
-                  <p className="
-                    text-blue-100
-                    text-sm
-                    font-medium
-                  ">
-                    Delivered To
-                  </p>
-
-                  <h3 className="
-                    text-xl
-                    font-bold
-                    mt-1
-                  ">
-                    AIIMS New Delhi
-                  </h3>
-
-                  <p className="
-                    text-blue-100
-                    mt-2
-                    leading-relaxed
-                  ">
-                    Ansari Nagar, New Delhi – 110029
-                  </p>
-
-                </div>
-
-              </div>
-
-
-              <div className="
-                mt-6
-                pt-5
-                border-t
-                border-white/20
-                flex
-                items-center
-                gap-2
+            {destination && (
+              <section className="
+                bg-blue-600
+                rounded-2xl
+                shadow-lg
+                shadow-blue-600/20
+                p-7
+                text-white
               ">
 
-                <CheckCircle2 size={18} />
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                    <MapPin size={23} />
+                  </div>
+                  <div>
+                    <p className="text-blue-100 text-sm font-medium">
+                      Destination
+                    </p>
+                    <h3 className="text-xl font-bold mt-1">
+                      {destination}
+                    </h3>
+                  </div>
+                </div>
 
-                <span className="font-semibold">
-                  Delivery successfully completed
-                </span>
+                <div className="mt-6 pt-5 border-t border-white/20 flex items-center gap-2">
+                  <CheckCircle2 size={18} />
+                  <span className="font-semibold">
+                    {status}
+                  </span>
+                </div>
 
-              </div>
-
-            </section>
+              </section>
+            )}
 
           </div>
 
@@ -1132,25 +683,12 @@ function DetailItem({
 }) {
   return (
     <div>
-
-      <p className="
-        text-sm
-        font-semibold
-        text-slate-500
-        mb-1.5
-      ">
+      <p className="text-sm font-semibold text-slate-500 mb-1.5">
         {label}
       </p>
-
-      <p className={`
-        text-base
-        font-semibold
-        leading-relaxed
-        ${valueClass}
-      `}>
+      <p className={`text-base font-semibold leading-relaxed ${valueClass}`}>
         {value}
       </p>
-
     </div>
   );
 }
@@ -1167,15 +705,7 @@ function TimelineStep({
   current = false,
 }) {
   return (
-    <div className="
-      relative
-      flex
-      gap-4
-      pb-6
-      last:pb-0
-    ">
-
-      {/* CIRCLE */}
+    <div className="relative flex gap-4 pb-6 last:pb-0">
 
       <div
         className={`
@@ -1197,43 +727,18 @@ function TimelineStep({
           }
         `}
       >
-
         {completed && (
-          <CheckCircle2
-            size={16}
-            className="text-white"
-          />
+          <CheckCircle2 size={16} className="text-white" />
         )}
-
       </div>
 
-
-      {/* TEXT */}
-
       <div className="pt-0.5">
-
-        <p
-          className={`
-            font-semibold
-            text-base
-            ${
-              current
-                ? "text-emerald-700"
-                : "text-slate-800"
-            }
-          `}
-        >
+        <p className={`font-semibold text-base ${current ? "text-emerald-700" : "text-slate-800"}`}>
           {title}
         </p>
-
-        <p className="
-          text-sm
-          text-slate-500
-          mt-1
-        ">
+        <p className="text-sm text-slate-500 mt-1">
           {subtitle}
         </p>
-
       </div>
 
     </div>
