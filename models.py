@@ -10,7 +10,6 @@ class Asset(Base):
     name = Column(String)                             # e.g., "Covid Vaccine"
     asset_type = Column(String)                       # e.g., "Vaccine" or "Organ"
     status = Column(String, default="In Transit")     # e.g., "Stored", "Delivered"
-    
     registration_datetime = Column(DateTime, default=datetime.datetime.utcnow)
     temp_constraint = Column(String, nullable=True)
     manufacturer = Column(String, nullable=True)
