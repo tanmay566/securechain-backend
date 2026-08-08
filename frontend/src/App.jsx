@@ -6,6 +6,7 @@ import Assets from "./pages/Assets";
 import AssetDetails from "./pages/AssetDetails";
 import NewAsset from "./pages/NewAsset";
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
 
@@ -31,7 +32,8 @@ function App() {
 
 
   // =========================================================
-  // DEFAULT ASSETS
+  // DEFAULT ASSETS (used only as a fallback if the backend
+  // is unreachable, so the demo UI never goes fully blank)
   // =========================================================
 
   const defaultAssets = [
@@ -237,106 +239,168 @@ function App() {
 
 
   // =========================================================
-  // LOAD ASSETS FROM LOCAL STORAGE
+  // LOAD ASSETS FROM BACKEND
+  // (was: LOAD ASSETS FROM LOCAL STORAGE)
   // =========================================================
 
-  const [assets, setAssets] = useState(() => {
-
-    try {
-
-      const savedAssets =
-        localStorage.getItem("vitalchain_assets");
-
-      if (savedAssets) {
-
-        return JSON.parse(savedAssets);
-
-      }
-
-      return defaultAssets;
-
-    } catch (error) {
-
-      console.error(
-        "Error loading assets:",
-        error
-      );
-
-      return defaultAssets;
-
-    }
-
-  });
-
-
-  // =========================================================
-  // SAVE ASSETS TO LOCAL STORAGE
-  // =========================================================
+  const [assets, setAssets] = useState([]);
 
   useEffect(() => {
 
-    try {
+    fetch(`${API_URL}/assets`)
+      .then((res) => res.json())
+      .then(setAssets)
+      .catch((error) => {
 
-      localStorage.setItem(
-        "vitalchain_assets",
-        JSON.stringify(assets)
-      );
+        console.error(
+          "Error loading assets from backend:",
+          error
+        );
 
-    } catch (error) {
+        setAssets(defaultAssets);
 
-      console.error(
-        "Error saving assets:",
-        error
-      );
+      });
 
-    }
+  }, []);
 
-  }, [assets]);
+
+  // =========================================================
+  // (The old "SAVE ASSETS TO LOCAL STORAGE" useEffect has
+  // been removed — Postgres is now the source of truth, so
+  // nothing needs to be synced to localStorage anymore.)
+  // =========================================================
 
 
   // =========================================================
   // CREATE NEW ASSET
+  // (now sends the asset to the backend instead of only
+  // updating local state)
   // =========================================================
 
-  const handleCreateAsset = (newAsset) => {
+  const handleCreateAsset = async (newAssetForm) => {
 
-    // Add the new asset to the beginning
-    // of the asset list.
+    try {
 
-    setAssets((previousAssets) => {
+      const payload = {
+        name: newAssetForm.name,
+        full_name: newAssetForm.fullName,
+        asset_id: newAssetForm.assetId,
+        batch_number: newAssetForm.batchNumber,
+        category: newAssetForm.category,
+        manufacturer: newAssetForm.manufacturer,
+        manufacturing_address: newAssetForm.manufacturingAddress,
+        manufacturing_date: newAssetForm.manufacturingDate || null,
+        expiry_date: newAssetForm.expiryDate || null,
+        storage_requirement: newAssetForm.storageRequirement,
+        quantity: newAssetForm.quantity,
+        origin: newAssetForm.origin,
+        destination: newAssetForm.destination,
+        transport_mode: newAssetForm.transportMode,
+        vehicle_number: newAssetForm.vehicleNumber,
+        driver: newAssetForm.driver,
+        dispatch_date: newAssetForm.dispatchDate,
+        expected_delivery: newAssetForm.expectedDelivery,
+        status: newAssetForm.status,
+      };
 
-      const updatedAssets = [
-        newAsset,
-        ...previousAssets,
-      ];
+      const res = await fetch(`${API_URL}/assets/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      return updatedAssets;
+      if (!res.ok) {
 
-    });
+        const errorData = await res.json();
+
+        console.error(
+          "Failed to create asset:",
+          errorData
+        );
+
+        alert(
+          `Failed to create asset: ${errorData.detail || "unknown error"}`
+        );
+
+        return;
+
+      }
+
+      const savedAsset = await res.json();
+
+      // Add the new asset to the beginning
+      // of the asset list.
+
+      setAssets((previousAssets) => {
+
+        const updatedAssets = [
+          savedAsset,
+          ...previousAssets,
+        ];
+
+        return updatedAssets;
+
+      });
 
 
-    // Automatically select the newly created asset.
+      // Automatically select the newly created asset.
 
-    setSelectedAsset(newAsset);
+      setSelectedAsset(savedAsset);
 
 
-    // After creating the asset,
-    // go back to Assets page.
+      // After creating the asset,
+      // go back to Assets page.
 
-    setCurrentPage("assets");
+      setCurrentPage("assets");
+
+    } catch (error) {
+
+      console.error(
+        "Error creating asset:",
+        error
+      );
+
+    }
 
   };
 
 
   // =========================================================
   // OPEN ASSET DETAILS
+  // (now fetches full detail from the backend instead of
+  // only using whatever data the list already had)
   // =========================================================
 
-  const handleAssetClick = (asset) => {
+  const handleAssetClick = async (asset) => {
 
-    // Store the exact asset that was clicked.
+    try {
 
-    setSelectedAsset(asset);
+      const res = await fetch(
+        `${API_URL}/assets/${asset.id}/status`
+      );
+
+      if (!res.ok) {
+
+        // fallback to whatever data we already have
+        setSelectedAsset(asset);
+
+      } else {
+
+        const fullAsset = await res.json();
+        setSelectedAsset(fullAsset);
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Error fetching asset details:",
+        error
+      );
+
+      setSelectedAsset(asset);
+
+    }
 
 
     // Open the dynamic details page.
@@ -493,4 +557,4 @@ function App() {
 }
 
 
-export default App; 
+export default App;
