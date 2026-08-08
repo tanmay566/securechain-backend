@@ -21,8 +21,14 @@ def create_asset(asset: schemas.AssetCreate, db: Session = Depends(get_db)):
         asset_id=asset.asset_id,
         name=asset.name,
         asset_type=asset.asset_type,
+        registration_datetime=asset.registration_datetime, 
+        temp_constraint = asset.temp_constraint,
+        manufacturer = asset.manufacturer,
+        manufacturing_date= asset.manufacturing_date,
+        expiry= asset.expiry,
+        origin= asset.origin
     )
-
+    
     db.add(new_asset)
     db.commit()
     db.refresh(new_asset)
