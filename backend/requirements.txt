@@ -145,3 +145,4 @@ xkit==0.0.0
 yarl==1.8.2
 yt-dlp==2024.4.9
 zipp==1.0.0
+x402[fastapi,evm]==2.20.0

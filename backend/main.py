@@ -5,6 +5,9 @@ import models
 import schemas
 from database import engine, get_db
 from blockchain import blockchain
+from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+from payments import x402_routes, x402_server
+import re
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -16,6 +19,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(PaymentMiddlewareASGI, routes=x402_routes, server=x402_server)
 
 
 @app.get("/")
@@ -33,48 +37,48 @@ def asset_to_frontend_shape(asset: models.Asset) -> dict:
     the React frontend expects (matches defaultAssets in App.jsx
     and the fallback chains in AssetDetails.jsx).
     """
+
     return {
         "id": asset.asset_id,
         "assetId": asset.asset_id,
         "name": asset.name,
-        "fullName": asset.full_name or asset.name,
-        "batchNumber": asset.batch_number or "",
+        "fullName": asset.full_name if asset.full_name is not None else asset.name,
+        "batchNumber": asset.batch_number if asset.batch_number is not None else "",
         "category": asset.category,
-        "manufacturer": asset.manufacturer or "",
-        "manufacturingAddress": asset.manufacturing_address or "",
-        "manufacturingDate": str(asset.manufacturing_date) if asset.manufacturing_date else "",
-        "expiryDate": str(asset.expiry_date) if asset.expiry_date else "",
-        "storageRequirement": asset.storage_requirement or "",
-        "quantity": asset.quantity or "",
-        "origin": asset.origin or "",
-        "destination": asset.destination or "",
-        "transportMode": asset.transport_mode or "",
-        "vehicleNumber": asset.vehicle_number or "",
-        "driver": asset.driver or "",
-        "dispatchDate": asset.dispatch_date or "",
-        "expectedDelivery": asset.expected_delivery or "",
+        "manufacturer": asset.manufacturer if asset.manufacturer is not None else "",
+        "manufacturingAddress": asset.manufacturing_address if asset.manufacturing_address is not None else "",
+        "manufacturingDate": str(asset.manufacturing_date) if asset.manufacturing_date is not None else "",
+        "expiryDate": str(asset.expiry_date) if asset.expiry_date is not None else "",
+        "storageRequirement": asset.storage_requirement if asset.storage_requirement is not None else "",
+        "quantity": asset.quantity if asset.quantity is not None else "",
+        "origin": asset.origin if asset.origin is not None else "",
+        "destination": asset.destination if asset.destination is not None else "",
+        "transportMode": asset.transport_mode if asset.transport_mode is not None else "",
+        "vehicleNumber": asset.vehicle_number if asset.vehicle_number is not None else "",
+        "driver": asset.driver if asset.driver is not None else "",
+        "dispatchDate": str(asset.dispatch_date) if asset.dispatch_date is not None else "",
+        "expectedDelivery": str(asset.expected_delivery) if asset.expected_delivery is not None else "",
         "status": asset.status,
-        "temperatureRange": asset.storage_requirement or "",
+        "temperatureRange": asset.storage_requirement if asset.storage_requirement is not None else "",
     }
+# ...existing code...
+    
 
 
+# ...existing code...
 def build_registration_snapshot(asset: models.Asset) -> dict:
     """
     Builds the exact dict that gets hashed for the ASSET_REGISTERED
-    event, both at write-time (when the event is first logged) and
-    at verify-time (when checking current DB data against the
-    on-chain hash). This function must stay identical in both places
-    — if it ever changes, previously-registered assets will no
-    longer verify correctly against their original on-chain hash.
+    event...
     """
     return {
         "asset_id": asset.asset_id,
-        "name": asset.name,
-        "manufacturer": asset.manufacturer,
-        "manufacturing_date": str(asset.manufacturing_date),
-        "batch_number": asset.batch_number,
+        "name": asset.name or "",
+        "manufacturer": asset.manufacturer or "",
+        "manufacturing_date": str(asset.manufacturing_date) if asset.manufacturing_date is not None else "",
+        "batch_number": asset.batch_number or "",
     }
-
+# ...existing code...
 
 # =====================================================================
 # ASSET REGISTRATION
@@ -193,17 +197,17 @@ def log_event(asset_id: str, event: schemas.EventCreate, db: Session = Depends(g
 # LOG A TEMPERATURE READING (IoT simulation)
 # =====================================================================
 
+# ...existing code...
 @app.post("/assets/{asset_id}/temperature")
 def log_temperature(asset_id: str, reading: schemas.TempReading, db: Session = Depends(get_db)):
     asset = db.query(models.Asset).filter(models.Asset.asset_id == asset_id).first()
     if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
 
-    # naive range parse from storage_requirement string, e.g. "2°C – 8°C"
     is_violation = False
     try:
-        nums = [float(n) for n in
-                "".join(c if (c.isdigit() or c in "-." ) else " " for c in (asset.storage_requirement or "")).split()]
+        nums = re.findall(r"-?\d+(?:\.\d+)?", asset.storage_requirement or "")
+        nums = [float(n) for n in nums]
         if len(nums) >= 2:
             min_t, max_t = nums[0], nums[1]
             is_violation = reading.temperature < min_t or reading.temperature > max_t
@@ -219,3 +223,4 @@ def log_temperature(asset_id: str, reading: schemas.TempReading, db: Session = D
         "temperature": reading.temperature,
         "violation": is_violation,
     }
+# ...existing code...
