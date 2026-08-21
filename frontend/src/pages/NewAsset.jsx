@@ -1,175 +1,361 @@
 import { useState } from "react";
-import BrandLogo from "../components/BrandLogo";
+import SecurePayment from "../components/SecurePayment";
 import vitalchainLogo from "../assets/vitalchain-logo.png";
+
 import {
   ArrowLeft,
   Package,
   Thermometer,
   Truck,
-  Plus,
   CheckCircle2,
+  Search,
+  Bell,
+  Grid2X2,
 } from "lucide-react";
-
 
 function NewAsset({
   onCancel,
   onCreateAsset,
+  onPayNow,
+  onDashboardClick,
 }) {
+  // =========================================================
+  // FORM DATA
+  // =========================================================
 
   const [formData, setFormData] = useState({
-
+    // Basic Asset Information
     name: "",
     fullName: "",
     assetId: "",
     batchNumber: "",
-
     category: "Vaccines",
-
     manufacturer: "",
     manufacturingAddress: "",
-
     manufacturingDate: "",
     expiryDate: "",
-
     storageRequirement: "2°C – 8°C",
-
     quantity: "",
 
+    // Shipment Information
     origin: "",
     destination: "",
-
-    transportMode:
-      "Temperature-controlled road transport",
-
+    transportMode: "Temperature-controlled road transport",
     vehicleNumber: "",
     driver: "",
-
     dispatchDate: "",
     expectedDelivery: "",
-
     status: "Delivered",
-
   });
 
-
   // =========================================================
-  // INPUT HANDLER
+  // HANDLE INPUT CHANGE
   // =========================================================
 
   const handleChange = (e) => {
-
     const { name, value } = e.target;
 
     setFormData((previous) => ({
       ...previous,
       [name]: value,
     }));
-
   };
 
+  // =========================================================
+  // VALIDATE FORM
+  // =========================================================
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      alert("Please enter Asset Name.");
+      return false;
+    }
+
+    if (!formData.assetId.trim()) {
+      alert("Please enter Asset ID.");
+      return false;
+    }
+
+    if (!formData.manufacturer.trim()) {
+      alert("Please enter Manufacturer.");
+      return false;
+    }
+
+    if (!formData.destination.trim()) {
+      alert("Please enter Destination.");
+      return false;
+    }
+
+    return true;
+  };
+
+  // =========================================================
+  // CREATE ASSET OBJECT
+  // =========================================================
+
+  const buildAsset = () => {
+    return {
+      ...formData,
+
+      temperatureRange: formData.storageRequirement,
+
+      createdAt: new Date().toISOString(),
+    };
+  };
+
+
+  // Keep the latest form data available to every page in the payment flow.
+  const saveAssetForPaymentFlow = (asset) => {
+    try {
+      const serialized = JSON.stringify(asset);
+
+      localStorage.setItem("vitalchainAsset", serialized);
+      localStorage.setItem("selectedAsset", serialized);
+      localStorage.setItem("vitalchainSelectedAsset", serialized);
+
+      window.dispatchEvent(
+        new CustomEvent("vitalchain:asset-updated", {
+          detail: asset,
+        })
+      );
+    } catch (error) {
+      console.warn("Unable to save asset data:", error);
+    }
+  };
 
   // =========================================================
   // CREATE ASSET
   // =========================================================
 
   const handleSubmit = (e) => {
-
     e.preventDefault();
 
-
-    if (
-      !formData.name ||
-      !formData.assetId ||
-      !formData.manufacturer ||
-      !formData.destination
-    ) {
-
-      alert(
-        "Please fill Asset Name, Asset ID, Manufacturer and Destination."
-      );
-
+    if (!validateForm()) {
       return;
     }
 
+    const newAsset = buildAsset();
 
-    const newAsset = {
+    saveAssetForPaymentFlow(newAsset);
 
-      ...formData,
+    console.log("Creating asset:", newAsset);
 
-      // Used by the details page
-      temperatureRange:
-        formData.storageRequirement,
-
-      createdAt:
-        new Date().toISOString(),
-
-    };
-
-
-    onCreateAsset(newAsset);
-
+    if (typeof onCreateAsset === "function") {
+      onCreateAsset(newAsset);
+    }
   };
 
+  // =========================================================
+  // PAY NOW
+  // =========================================================
+
+  const handlePayNow = () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    const newAsset = buildAsset();
+
+    saveAssetForPaymentFlow(newAsset);
+
+    console.log("Opening payment page for:", newAsset);
+
+    if (typeof onPayNow === "function") {
+      onPayNow(newAsset);
+      return;
+    }
+
+    alert(
+      "Payment page is not connected yet. Please connect onPayNow in App.jsx."
+    );
+  };
+
+  // =========================================================
+  // DASHBOARD NAVIGATION
+  // =========================================================
+
+  const handleDashboardNavigation = () => {
+    if (typeof onDashboardClick === "function") {
+      onDashboardClick();
+      return;
+    }
+
+    // Fallback if App.jsx doesn't provide the function.
+    // This prevents the page from crashing.
+    console.warn("onDashboardClick is not connected in App.jsx.");
+  };
+
+  // =========================================================
+  // PAGE
+  // =========================================================
 
   return (
-
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
 
       {/* =====================================================
           HEADER
       ===================================================== */}
 
-      <header className="h-[68px] bg-white border-b border-slate-200 flex items-center px-6">
+      <header className="w-full h-[88px] bg-white border-b border-slate-200 flex items-center px-6 lg:px-10">
 
-        {/* Logo */}
+        {/* =================================================
+            VITALCHAIN LOGO
+        ================================================= */}
 
-       <div className="w-[270px] h-[64px] shrink-0 flex items-center">
-         <img
-           src={vitalchainLogo}
-           alt="VITALChain"
-           className="h-[166px] w-auto object-contain"
-         />
-       </div>
+        <div className="w-[330px] shrink-0 flex items-center">
+          <img
+            src={vitalchainLogo}
+            alt="VITALChain"
+            className="h-[72px] w-auto object-contain"
+          />
+        </div>
 
-        {/* Navigation */}
+        {/* =================================================
+            NAVIGATION
+        ================================================= */}
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-2 shrink-0">
 
+          {/* Dashboard */}
           <button
-            onClick={onCancel}
-            className="px-5 py-2.5 rounded-full text-slate-600 hover:bg-slate-100 font-medium transition"
+            type="button"
+            onClick={handleDashboardNavigation}
+            className="
+              px-7
+              py-3
+              rounded-full
+              text-[17px]
+              font-medium
+              text-slate-700
+              hover:bg-blue-50
+              hover:text-blue-600
+              transition
+            "
           >
             Dashboard
           </button>
 
+          {/* Assets - ACTIVE */}
           <button
-            onClick={onCancel}
-            className="px-5 py-2.5 rounded-full bg-blue-50 text-blue-600 font-semibold"
+            type="button"
+            className="
+              px-7
+              py-3
+              rounded-full
+              bg-blue-50
+              text-blue-600
+              text-[17px]
+              font-semibold
+            "
           >
             Assets
           </button>
 
         </nav>
 
+        {/* =================================================
+            SEARCH BAR
+        ================================================= */}
 
-        <div className="ml-auto flex items-center gap-5">
+        <div className="flex-1 mx-8 min-w-0">
 
-          <button className="text-slate-500">
-            🔔
-          </button>
+          <div className="relative">
 
-          <button className="text-slate-500">
-            ▦
-          </button>
+            <Search
+              size={23}
+              className="
+                absolute
+                left-5
+                top-1/2
+                -translate-y-1/2
+                text-slate-400
+                pointer-events-none
+              "
+            />
 
-          <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-            R
+            <input
+              type="text"
+              placeholder="Search assets, shipments..."
+              className="
+                w-full
+                h-[56px]
+                pl-14
+                pr-5
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                text-[17px]
+                text-slate-700
+                placeholder:text-slate-400
+                outline-none
+                focus:border-blue-400
+                focus:ring-4
+                focus:ring-blue-100
+                transition
+              "
+            />
+
           </div>
 
         </div>
 
-      </header>
+        {/* =================================================
+            RIGHT SIDE
+        ================================================= */}
 
+        <div className="flex items-center gap-7 shrink-0">
+
+          {/* Notification */}
+          <button
+            type="button"
+            aria-label="Notifications"
+            className="
+              text-slate-500
+              hover:text-blue-600
+              transition
+            "
+          >
+            <Bell size={25} />
+          </button>
+
+          {/* Grid / Apps */}
+          <button
+            type="button"
+            aria-label="Applications"
+            className="
+              text-slate-500
+              hover:text-blue-600
+              transition
+            "
+          >
+            <Grid2X2 size={24} />
+          </button>
+
+          {/* Profile */}
+          <button
+            type="button"
+            aria-label="Profile"
+            className="
+              w-[50px]
+              h-[50px]
+              rounded-full
+              bg-blue-600
+              text-white
+              text-lg
+              font-semibold
+              flex
+              items-center
+              justify-center
+              shadow-sm
+            "
+          >
+            R
+          </button>
+
+        </div>
+
+      </header>
 
       {/* =====================================================
           PAGE CONTENT
@@ -177,97 +363,83 @@ function NewAsset({
 
       <main className="w-full px-8 lg:px-12 py-8">
 
-
-        {/* Back */}
+        {/* =================================================
+            BACK BUTTON
+        ================================================= */}
 
         <button
+          type="button"
           onClick={onCancel}
-          className="flex items-center gap-2 text-blue-600 font-medium hover:text-blue-800 mb-5"
+          className="
+            flex
+            items-center
+            gap-2
+            text-blue-600
+            font-medium
+            hover:text-blue-800
+            transition
+            mb-5
+          "
         >
-
           <ArrowLeft size={18} />
-
           Back to Assets
-
         </button>
 
+        {/* =================================================
+            PAGE HEADING
+        ================================================= */}
 
-        {/* Heading */}
+        <div className="mb-8">
 
-        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl font-bold text-slate-900">
+            Add New Asset
+          </h1>
 
-          <div>
-
-            <h1 className="text-4xl font-bold text-slate-900">
-              Add New Asset
-            </h1>
-
-            <p className="text-lg text-slate-500 mt-2">
-              Register a new healthcare asset and add it to the VITALChain tracking system.
-            </p>
-
-          </div>
-
-
-          <div className="flex gap-3">
-
-            <button
-              onClick={onCancel}
-              className="px-6 py-3 rounded-xl border border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleSubmit}
-              className="px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700"
-            >
-              Create Asset
-            </button>
-
-          </div>
+          <p className="text-lg text-slate-500 mt-2">
+            Register a new healthcare asset and add it to the
+            VITALChain tracking system.
+          </p>
 
         </div>
 
+        {/* =================================================
+            FORM
+        ================================================= */}
 
         <form
+          id="new-asset-form"
           onSubmit={handleSubmit}
           className="space-y-6"
         >
 
-
           {/* =================================================
-              BASIC INFORMATION
+              BASIC ASSET INFORMATION
           ================================================= */}
 
-          <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-7">
+          <section
+            className="
+              bg-white
+              border
+              border-slate-200
+              rounded-2xl
+              shadow-sm
+              p-7
+            "
+          >
 
-            <div className="flex items-center gap-3 mb-7">
-
-              <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
+            <SectionHeader
+              icon={
                 <Package
                   size={23}
                   className="text-blue-600"
                 />
-              </div>
-
-              <div>
-
-                <h2 className="text-xl font-bold">
-                  Basic Asset Information
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Enter the basic information of the healthcare asset.
-                </p>
-
-              </div>
-
-            </div>
-
+              }
+              iconBg="bg-blue-50"
+              title="Basic Asset Information"
+              description="Enter the basic information of the healthcare asset."
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
 
               <Input
                 label="Asset Name"
@@ -277,7 +449,6 @@ function NewAsset({
                 placeholder="Example: COVISHIELD"
               />
 
-
               <Input
                 label="Full Vaccine / Asset Name"
                 name="fullName"
@@ -285,7 +456,6 @@ function NewAsset({
                 onChange={handleChange}
                 placeholder="Example: COVISHIELD (ChAdOx1 nCoV-19)"
               />
-
 
               <Input
                 label="Asset ID"
@@ -295,7 +465,6 @@ function NewAsset({
                 placeholder="Example: VC-IND-2026-000981"
               />
 
-
               <Input
                 label="Batch Number"
                 name="batchNumber"
@@ -304,7 +473,7 @@ function NewAsset({
                 placeholder="Example: DEMO-COV-260501"
               />
 
-
+              {/* Asset Type */}
               <div>
 
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -315,18 +484,38 @@ function NewAsset({
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full h-12 px-4 rounded-xl border border-slate-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                  className="
+                    w-full
+                    h-12
+                    px-4
+                    rounded-xl
+                    border
+                    border-slate-300
+                    bg-white
+                    outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    text-base
+                  "
                 >
+                  <option value="Vaccines">
+                    Vaccines
+                  </option>
 
-                  <option>Vaccines</option>
-                  <option>Diagnostic Equipment</option>
-                  <option>Medical Devices</option>
-                  <option>Pharmaceuticals</option>
+                  <option value="Diagnostic Equipment">
+                    Diagnostic Equipment
+                  </option>
 
+                  <option value="Medical Devices">
+                    Medical Devices
+                  </option>
+
+                  <option value="Pharmaceuticals">
+                    Pharmaceuticals
+                  </option>
                 </select>
 
               </div>
-
 
               <Input
                 label="Manufacturer"
@@ -336,7 +525,6 @@ function NewAsset({
                 placeholder="Manufacturer / organization"
               />
 
-
               <Input
                 label="Manufacturing Date"
                 name="manufacturingDate"
@@ -344,7 +532,6 @@ function NewAsset({
                 onChange={handleChange}
                 type="date"
               />
-
 
               <Input
                 label="Expiry Date"
@@ -354,7 +541,6 @@ function NewAsset({
                 type="date"
               />
 
-
               <Input
                 label="Quantity"
                 name="quantity"
@@ -362,7 +548,6 @@ function NewAsset({
                 onChange={handleChange}
                 placeholder="Example: 500 Vials"
               />
-
 
               <div className="md:col-span-2">
 
@@ -380,38 +565,32 @@ function NewAsset({
 
           </section>
 
-
           {/* =================================================
-              STORAGE
+              STORAGE & TEMPERATURE
           ================================================= */}
 
-          <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-7">
+          <section
+            className="
+              bg-white
+              border
+              border-slate-200
+              rounded-2xl
+              shadow-sm
+              p-7
+            "
+          >
 
-            <div className="flex items-center gap-3 mb-7">
-
-              <div className="w-11 h-11 rounded-xl bg-cyan-50 flex items-center justify-center">
-
+            <SectionHeader
+              icon={
                 <Thermometer
                   size={23}
                   className="text-cyan-600"
                 />
-
-              </div>
-
-              <div>
-
-                <h2 className="text-xl font-bold">
-                  Storage & Temperature Constraints
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Define the safe storage conditions.
-                </p>
-
-              </div>
-
-            </div>
-
+              }
+              iconBg="bg-cyan-50"
+              title="Storage & Temperature Constraints"
+              description="Define the safe storage conditions."
+            />
 
             <Input
               label="Temperature Constraint"
@@ -421,8 +600,21 @@ function NewAsset({
               placeholder="Example: 2°C – 8°C"
             />
 
-
-            <div className="mt-4 flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700">
+            <div
+              className="
+                mt-4
+                flex
+                items-center
+                gap-2
+                px-4
+                py-3
+                rounded-xl
+                bg-emerald-50
+                border
+                border-emerald-100
+                text-emerald-700
+              "
+            >
 
               <CheckCircle2 size={18} />
 
@@ -434,41 +626,34 @@ function NewAsset({
 
           </section>
 
-
           {/* =================================================
               SHIPMENT INFORMATION
           ================================================= */}
 
-          <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-7">
+          <section
+            className="
+              bg-white
+              border
+              border-slate-200
+              rounded-2xl
+              shadow-sm
+              p-7
+            "
+          >
 
-            <div className="flex items-center gap-3 mb-7">
-
-              <div className="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center">
-
+            <SectionHeader
+              icon={
                 <Truck
                   size={23}
                   className="text-indigo-600"
                 />
-
-              </div>
-
-              <div>
-
-                <h2 className="text-xl font-bold">
-                  Shipment Information
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  These details will automatically appear on the asset tracking page.
-                </p>
-
-              </div>
-
-            </div>
-
+              }
+              iconBg="bg-indigo-50"
+              title="Shipment Information"
+              description="These details will automatically appear on the asset tracking page."
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
 
               <Input
                 label="Origin"
@@ -478,7 +663,6 @@ function NewAsset({
                 placeholder="Origin facility / organization"
               />
 
-
               <Input
                 label="Destination"
                 name="destination"
@@ -486,7 +670,6 @@ function NewAsset({
                 onChange={handleChange}
                 placeholder="Destination hospital / facility"
               />
-
 
               <Input
                 label="Transport Mode"
@@ -496,7 +679,6 @@ function NewAsset({
                 placeholder="Example: Temperature-controlled road transport"
               />
 
-
               <Input
                 label="Vehicle Number"
                 name="vehicleNumber"
@@ -504,7 +686,6 @@ function NewAsset({
                 onChange={handleChange}
                 placeholder="Example: MH-12-AB-4582"
               />
-
 
               <Input
                 label="Driver"
@@ -514,7 +695,7 @@ function NewAsset({
                 placeholder="Driver name"
               />
 
-
+              {/* Current Status */}
               <div>
 
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -525,7 +706,19 @@ function NewAsset({
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="w-full h-12 px-4 rounded-xl border border-slate-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                  className="
+                    w-full
+                    h-12
+                    px-4
+                    rounded-xl
+                    border
+                    border-slate-300
+                    bg-white
+                    outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    text-base
+                  "
                 >
 
                   <option value="Delivered">
@@ -544,7 +737,6 @@ function NewAsset({
 
               </div>
 
-
               <Input
                 label="Dispatch Date & Time"
                 name="dispatchDate"
@@ -552,7 +744,6 @@ function NewAsset({
                 onChange={handleChange}
                 placeholder="Example: 05 May 2026 — 08:30 AM"
               />
-
 
               <Input
                 label="Expected Delivery"
@@ -566,10 +757,16 @@ function NewAsset({
 
           </section>
 
+          {/* =================================================
+              SECURE PAYMENT
+          ================================================= */}
 
-          {/* Bottom button */}
-
-          
+          <SecurePayment
+            assetName={formData.name || "Enter Asset Name"}
+            assetId={formData.assetId || "Enter Asset ID"}
+            amount="19,999"
+            onPayNow={handlePayNow}
+          />
 
         </form>
 
@@ -580,9 +777,53 @@ function NewAsset({
 }
 
 
-/* =============================================================
-   INPUT COMPONENT
-============================================================= */
+// =============================================================
+// SECTION HEADER
+// =============================================================
+
+function SectionHeader({
+  icon,
+  iconBg,
+  title,
+  description,
+}) {
+  return (
+    <div className="flex items-center gap-3 mb-7">
+
+      <div
+        className={`
+          w-11
+          h-11
+          rounded-xl
+          ${iconBg}
+          flex
+          items-center
+          justify-center
+        `}
+      >
+        {icon}
+      </div>
+
+      <div>
+
+        <h2 className="text-xl font-bold text-slate-900">
+          {title}
+        </h2>
+
+        <p className="text-sm text-slate-500">
+          {description}
+        </p>
+
+      </div>
+
+    </div>
+  );
+}
+
+
+// =============================================================
+// INPUT COMPONENT
+// =============================================================
 
 function Input({
   label,
@@ -592,9 +833,7 @@ function Input({
   placeholder,
   type = "text",
 }) {
-
   return (
-
     <div>
 
       <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -607,13 +846,25 @@ function Input({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full h-12 px-4 rounded-xl border border-slate-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-base"
+        className="
+          w-full
+          h-12
+          px-4
+          rounded-xl
+          border
+          border-slate-300
+          bg-white
+          outline-none
+          focus:ring-2
+          focus:ring-blue-500
+          focus:border-blue-500
+          transition
+          text-base
+        "
       />
 
     </div>
-
   );
 }
-
 
 export default NewAsset;

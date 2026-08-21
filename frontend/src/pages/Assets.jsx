@@ -598,7 +598,7 @@ function Assets({
 
                   {/* ASSET ID */}
                   <span className="text-base font-medium text-slate-600">
-                    #{asset.id}
+                    # {asset.id}
                   </span>
 
 

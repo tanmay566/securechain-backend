@@ -5,24 +5,63 @@ import Dashboard from "./pages/Dashboard";
 import Assets from "./pages/Assets";
 import AssetDetails from "./pages/AssetDetails";
 import NewAsset from "./pages/NewAsset";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import Wallet from "./pages/Wallet";
+import Send from "./pages/Send";
+import ConfirmOrder from "./pages/ConfirmOrder";
+import VerifyVaccine from "./pages/VerifyVaccine";
+import VaccineTraceability from "./pages/VaccineTraceability";
+import api from "./api/api";
 
 function App() {
+  // =========================================================
+  // CHECK PUBLIC URL
+  // =========================================================
+
+  const getInitialPage = () => {
+    const pathname = window.location.pathname;
+
+    /*
+      PUBLIC VACCINE VERIFICATION
+
+      Supported URLs:
+
+      /verify?medId=zero33%2F3
+
+      /verify-vaccine?medId=zero33%2F3
+
+      /verify-vaccine/details?medId=zero33%2F3
+    */
+
+    if (
+      pathname === "/verify" ||
+      pathname === "/verify-vaccine"
+    ) {
+      return "verify-vaccine";
+    }
+
+    if (pathname === "/verify-vaccine/details") {
+      return "vaccine-details";
+    }
+
+    if (pathname === "/vaccine-traceability") {
+      return "vaccine-details";
+    }
+
+    return "dashboard";
+  };
 
   // =========================================================
-  // LOGIN STATE
+  // LOGIN
   // =========================================================
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
 
   // =========================================================
   // CURRENT PAGE
   // =========================================================
 
-  const [currentPage, setCurrentPage] = useState("dashboard");
-
+  const [currentPage, setCurrentPage] =
+    useState(getInitialPage);
 
   // =========================================================
   // SELECTED ASSET
@@ -30,531 +69,843 @@ function App() {
 
   const [selectedAsset, setSelectedAsset] = useState(null);
 
-
   // =========================================================
-  // DEFAULT ASSETS (used only as a fallback if the backend
-  // is unreachable, so the demo UI never goes fully blank)
+  // CONFIRM ORDER DATA
   // =========================================================
 
-  const defaultAssets = [
-
-    // =======================================================
-    // COVISHIELD
-    // =======================================================
-
-    {
-      id: "VC-IND-2026-000981",
-
-      name: "COVISHIELD",
-
-      fullName:
-        "COVISHIELD (ChAdOx1 nCoV-19)",
-
-      batchNumber:
-        "DEMO-COV-260501",
-
-      category:
-        "Vaccines",
-
-      manufacturer:
-        "Serum Institute of India Pvt. Ltd.",
-
-      manufacturingAddress:
-        "212/2, Hadapsar, Off Soli Poonawalla Road, Pune – 411028, Maharashtra, India",
-
-      manufacturingDate:
-        "01 May 2026",
-
-      expiryDate:
-        "31 October 2026",
-
-      storageRequirement:
-        "2°C – 8°C",
-
-      quantity:
-        "500 Vials",
-
-      status:
-        "Delivered",
-
-      origin:
-        "Serum Institute of India, Pune, Maharashtra",
-
-      destination:
-        "AIIMS New Delhi, Ansari Nagar, New Delhi – 110029",
-
-      transportMode:
-        "Temperature-controlled road transport",
-
-      vehicleNumber:
-        "MH-12-AB-4582",
-
-      driver:
-        "Ramesh Kumar",
-
-      dispatchDate:
-        "05 May 2026 — 08:30 AM",
-
-      expectedDelivery:
-        "07 May 2026 — 02:00 PM",
-
-      temperatureRange:
-        "2°C – 8°C",
-    },
-
-
-    // =======================================================
-    // PFIZER
-    // =======================================================
-
-    {
-      id: "SC-VAC-8992",
-
-      name:
-        "Pfizer-BioNTech COVID-19",
-
-      fullName:
-        "Pfizer-BioNTech COVID-19",
-
-      batchNumber:
-        "B-PFZ-2026",
-
-      category:
-        "Vaccines",
-
-      manufacturer:
-        "Pfizer Inc.",
-
-      manufacturingAddress:
-        "United States",
-
-      manufacturingDate:
-        "12 April 2026",
-
-      expiryDate:
-        "12 October 2026",
-
-      storageRequirement:
-        "-70°C to -60°C",
-
-      quantity:
-        "300 Vials",
-
-      status:
-        "Delivered",
-
-      origin:
-        "Pfizer Distribution Center",
-
-      destination:
-        "Central Hub Cold Storage Unit A",
-
-      transportMode:
-        "Temperature-controlled road transport",
-
-      vehicleNumber:
-        "DL-01-AB-7821",
-
-      driver:
-        "Demo Driver",
-
-      dispatchDate:
-        "15 April 2026 — 09:00 AM",
-
-      expectedDelivery:
-        "16 April 2026 — 04:00 PM",
-
-      temperatureRange:
-        "-70°C to -60°C",
-    },
-
-
-    // =======================================================
-    // ULTRASOUND
-    // =======================================================
-
-    {
-      id:
-        "SC-EQP-1044",
-
-      name:
-        "Portable Ultrasound X3",
-
-      fullName:
-        "Portable Ultrasound X3",
-
-      batchNumber:
-        "US-2026-1044",
-
-      category:
-        "Diagnostic Equipment",
-
-      manufacturer:
-        "Healthcare Medical Systems",
-
-      manufacturingAddress:
-        "New Delhi, India",
-
-      manufacturingDate:
-        "01 March 2026",
-
-      expiryDate:
-        "01 March 2031",
-
-      storageRequirement:
-        "15°C – 30°C",
-
-      quantity:
-        "1 Unit",
-
-      status:
-        "Delivered",
-
-      origin:
-        "Medical Equipment Warehouse",
-
-      destination:
-        "Fleet Vehicle #42",
-
-      transportMode:
-        "Road Transport",
-
-      vehicleNumber:
-        "DL-42-XY-1001",
-
-      driver:
-        "Demo Driver",
-
-      dispatchDate:
-        "02 March 2026 — 10:00 AM",
-
-      expectedDelivery:
-        "03 March 2026 — 03:00 PM",
-
-      temperatureRange:
-        "15°C – 30°C",
-    },
-
-  ];
-
+  const [confirmOrderData, setConfirmOrderData] =
+    useState(null);
 
   // =========================================================
-  // LOAD ASSETS FROM BACKEND
-  // (was: LOAD ASSETS FROM LOCAL STORAGE)
+  // PATIENT VERIFICATION DATA
+  // =========================================================
+
+  const [patientVerificationData, setPatientVerificationData] =
+    useState(() => {
+      try {
+        const saved = localStorage.getItem(
+          "vitalchain_patient_verification"
+        );
+
+        return saved ? JSON.parse(saved) : null;
+      } catch {
+        return null;
+      }
+    });
+
+  // =========================================================
+  // ASSETS — BACKEND IS THE ONLY SOURCE OF TRUTH
   // =========================================================
 
   const [assets, setAssets] = useState([]);
+  const [assetsLoading, setAssetsLoading] = useState(true);
 
+  // Clear the old frontend cache once. Asset records must never be
+  // resurrected from localStorage after being deleted from the backend.
   useEffect(() => {
-
-    fetch(`${API_URL}/assets`)
-      .then((res) => res.json())
-      .then(setAssets)
-      .catch((error) => {
-
-        console.error(
-          "Error loading assets from backend:",
-          error
-        );
-
-        setAssets(defaultAssets);
-
-      });
-
+    try {
+      localStorage.removeItem("vitalchain_assets");
+    } catch (error) {
+      console.warn("Could not clear legacy asset cache:", error);
+    }
   }, []);
 
-
   // =========================================================
-  // (The old "SAVE ASSETS TO LOCAL STORAGE" useEffect has
-  // been removed — Postgres is now the source of truth, so
-  // nothing needs to be synced to localStorage anymore.)
+  // LOAD ASSETS FROM BACKEND
   // =========================================================
 
+  const loadBackendAssets = async () => {
+    const backendAssets = await api.assets.list();
+    return Array.isArray(backendAssets) ? backendAssets : [];
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setAssetsLoading(true);
+        const backendAssets = await loadBackendAssets();
+        if (!cancelled) setAssets(backendAssets);
+      } catch (error) {
+        console.error("Could not load assets from backend:", error);
+        if (!cancelled) setAssets([]);
+      } finally {
+        if (!cancelled) setAssetsLoading(false);
+      }
+    };
+
+    load();
+
+    const handleAssetUpdated = () => {
+      load().catch(() => {});
+    };
+
+    window.addEventListener("vitalchain:asset-updated", handleAssetUpdated);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("vitalchain:asset-updated", handleAssetUpdated);
+    };
+  }, []);
 
   // =========================================================
   // CREATE NEW ASSET
-  // (now sends the asset to the backend instead of only
-  // updating local state)
   // =========================================================
 
-  const handleCreateAsset = async (newAssetForm) => {
+  const handleCreateAsset = (newAsset) => {
+    // NewAsset collects the form; the actual DB/chain registration happens
+    // only after payment confirmation in handlePaymentSuccess.
+    setSelectedAsset(newAsset);
+    setCurrentPage("wallet");
+  };
+
+  // =========================================================
+  // PAYMENT SUCCESS / REGISTER ASSET
+  // =========================================================
+
+  const handlePaymentSuccess = async (paidAsset) => {
+    console.log("Confirm & Register Asset clicked:", paidAsset);
+
+    if (!paidAsset) {
+      alert("Unable to register the asset because asset data is missing.");
+      return;
+    }
+
+    const formAssetId = String(
+      paidAsset.assetId || paidAsset.assetID || paidAsset.id || ""
+    ).trim();
+
+    if (!formAssetId) {
+      alert("Asset ID is missing.");
+      return;
+    }
+
+    const completeAsset = {
+      ...paidAsset,
+      id: formAssetId,
+      assetId: formAssetId,
+      paymentStatus: "Successful",
+      paymentId: paidAsset.paymentId || `VCH-${Date.now().toString().slice(-8)}`,
+      paymentMethod: paidAsset.paymentMethod || "Wallet",
+      paymentDate: paidAsset.paymentDate || new Date().toLocaleString("en-IN"),
+      status: paidAsset.status || "Delivered",
+      registrationStatus: "Registered",
+      registeredAt: new Date().toISOString(),
+    };
 
     try {
+      // This is the authoritative write: DB + blockchain event.
+      const backendAsset = await api.assets.create(completeAsset);
+      const freshAssets = await loadBackendAssets();
 
-      const payload = {
-        name: newAssetForm.name,
-        full_name: newAssetForm.fullName,
-        asset_id: newAssetForm.assetId,
-        batch_number: newAssetForm.batchNumber,
-        category: newAssetForm.category,
-        manufacturer: newAssetForm.manufacturer,
-        manufacturing_address: newAssetForm.manufacturingAddress,
-        manufacturing_date: newAssetForm.manufacturingDate || null,
-        expiry_date: newAssetForm.expiryDate || null,
-        storage_requirement: newAssetForm.storageRequirement,
-        quantity: newAssetForm.quantity,
-        origin: newAssetForm.origin,
-        destination: newAssetForm.destination,
-        transport_mode: newAssetForm.transportMode,
-        vehicle_number: newAssetForm.vehicleNumber,
-        driver: newAssetForm.driver,
-        dispatch_date: newAssetForm.dispatchDate,
-        expected_delivery: newAssetForm.expectedDelivery,
-        status: newAssetForm.status,
-      };
+      setAssets(freshAssets);
+      setSelectedAsset(backendAsset);
+      setConfirmOrderData(null);
+      setCurrentPage("assets");
+    } catch (error) {
+      console.error("Asset registration failed:", error);
+      alert(error?.message || "Unable to register the asset with the backend.");
+    }
+  };
 
-      const res = await fetch(`${API_URL}/assets/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+  // =========================================================
+  // ASSET DETAILS
+  // =========================================================
+
+  const handleAssetClick = (
+    asset
+  ) => {
+    setSelectedAsset(asset);
+
+    setCurrentPage(
+      "asset-details"
+    );
+  };
+
+  // =========================================================
+  // WALLET
+  // =========================================================
+
+  const handlePayNow = (
+    asset
+  ) => {
+    setSelectedAsset(asset);
+
+    setCurrentPage(
+      "wallet"
+    );
+  };
+
+  // =========================================================
+  // SEND
+  // =========================================================
+
+  const handleSend = () => {
+    setCurrentPage(
+      "send"
+    );
+  };
+
+  // =========================================================
+  // CONFIRM ORDER
+  // =========================================================
+
+  const handleConfirmOrder = (
+    paymentData
+  ) => {
+    if (
+      paymentData?.selectedAsset
+    ) {
+      setSelectedAsset(
+        paymentData.selectedAsset
+      );
+    }
+
+    setConfirmOrderData(
+      paymentData
+    );
+
+    setCurrentPage(
+      "confirm-order"
+    );
+  };
+
+  // =========================================================
+  // VACCINE VERIFICATION
+  // =========================================================
+
+  const handleVaccineVerification = async (patientData) => {
+    console.log("Vaccine verification:", patientData);
+
+    if (!patientData?.assetId) {
+      alert("Asset ID is missing. Please scan the vaccine QR code again.");
+      return;
+    }
+
+    const fullName = patientData.fullName?.trim() || "";
+    const phone = patientData.phone?.trim() || "";
+    const assetId = patientData.assetId.trim();
+
+    if (!fullName) {
+      alert("Please enter the patient's full name.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    try {
+      // The backend is authoritative for public vaccine registration.
+      // This creates the patient + vaccination record, marks the asset
+      // administered, and writes the blockchain event.
+      const response = await api.vaccinations.register({
+        fullName,
+        phone,
+        assetId,
+        hospital: "VITALChain Hospital",
       });
 
-      if (!res.ok) {
+      if (!response?.success || !response?.vaccination || !response?.asset) {
+        throw new Error("Backend returned an incomplete vaccination response.");
+      }
 
-        const errorData = await res.json();
+      const vaccination = response.vaccination;
+      const backendAsset = response.asset;
 
-        console.error(
-          "Failed to create asset:",
-          errorData
+      const patientRecord = {
+        fullName: vaccination.patientName || fullName,
+        phone: vaccination.patientMobile || phone,
+        assetId: vaccination.assetId || assetId,
+        registrationDate:
+          vaccination.registeredAt ||
+          new Date().toISOString(),
+        vaccinationId: vaccination.vaccinationId,
+        hospital: vaccination.hospital || "VITALChain Hospital",
+        blockchainHash: vaccination.blockchainHash || null,
+      };
+
+      setPatientVerificationData(patientRecord);
+
+      try {
+        localStorage.setItem(
+          "vitalchain_patient_verification",
+          JSON.stringify(patientRecord)
+        );
+      } catch (storageError) {
+        console.warn(
+          "Could not save patient verification locally:",
+          storageError
+        );
+      }
+
+      // Keep the authoritative backend asset while preserving useful
+      // frontend fields that may exist on locally-created demo assets.
+      const existingAsset = assets.find((asset) => {
+        const existingId = String(
+          asset.assetId || asset.assetID || asset.id || ""
+        )
+          .trim()
+          .toLowerCase();
+
+        return existingId === assetId.toLowerCase();
+      });
+
+      const completeAsset = {
+        ...(existingAsset || {}),
+        ...backendAsset,
+        id: backendAsset.assetId || assetId,
+        assetId: backendAsset.assetId || assetId,
+        patientName: patientRecord.fullName,
+        patientMobile: patientRecord.phone,
+        vaccinationId: patientRecord.vaccinationId,
+        registeredAt: patientRecord.registrationDate,
+        hospital: patientRecord.hospital,
+        blockchainHash: patientRecord.blockchainHash,
+        status: backendAsset.status || "Administered",
+      };
+
+      setAssets((previousAssets) => {
+        const existingIndex = previousAssets.findIndex((asset) => {
+          const existingId = String(
+            asset.assetId || asset.assetID || asset.id || ""
+          )
+            .trim()
+            .toLowerCase();
+
+          return existingId === assetId.toLowerCase();
+        });
+
+        if (existingIndex === -1) {
+          return [completeAsset, ...previousAssets];
+        }
+
+        return previousAssets.map((asset, index) =>
+          index === existingIndex
+            ? { ...asset, ...completeAsset }
+            : asset
+        );
+      });
+
+      setSelectedAsset(completeAsset);
+      setCurrentPage("vaccine-details");
+    } catch (error) {
+      console.error("Vaccine registration failed:", error);
+
+      const message =
+        error?.message ||
+        "Unable to verify/register this vaccine. Please try again.";
+
+      alert(message);
+    }
+  };
+
+  // =========================================================
+  // HANDLE PUBLIC URL
+  // =========================================================
+
+  useEffect(() => {
+    const pathname =
+      window.location.pathname;
+
+    /*
+      Only handle public traceability URLs here.
+
+      /verify is handled by the initial page
+      and VerifyVaccine itself.
+    */
+
+    const isTraceabilityPage =
+      pathname ===
+        "/vaccine-traceability" ||
+      pathname ===
+        "/verify-vaccine/details";
+
+    if (!isTraceabilityPage) {
+      return;
+    }
+
+    try {
+      const params =
+        new URLSearchParams(
+          window.location.search
         );
 
-        alert(
-          `Failed to create asset: ${errorData.detail || "unknown error"}`
+      // New QR links use the complete Med ID, e.g. zero33/3.
+      // assetId remains supported for older QR links.
+      const qrAssetId =
+        (
+          params.get("medId") ||
+          params.get("assetId")
+        )?.trim();
+
+      if (!qrAssetId) {
+        setCurrentPage(
+          "verify-vaccine"
         );
 
         return;
-
       }
 
-      const savedAsset = await res.json();
+      // Find asset
+      let matchedAsset =
+        assets.find(
+          (asset) => {
+            const existingId =
+              asset.assetId ||
+              asset.assetID ||
+              asset.id ||
+              "";
 
-      // Add the new asset to the beginning
-      // of the asset list.
+            return (
+              String(
+                existingId
+              )
+                .trim()
+                .toLowerCase() ===
+              qrAssetId.toLowerCase()
+            );
+          }
+        );
 
-      setAssets((previousAssets) => {
+      if (!matchedAsset) {
+        api.assets
+          .getStatus(qrAssetId)
+          .then((backendAsset) => {
+            setSelectedAsset(backendAsset);
 
-        const updatedAssets = [
-          savedAsset,
-          ...previousAssets,
-        ];
+            const savedPatient = localStorage.getItem(
+              "vitalchain_patient_verification"
+            );
 
-        return updatedAssets;
+            if (savedPatient) {
+              try {
+                const parsedPatient = JSON.parse(savedPatient);
 
-      });
+                if (
+                  String(parsedPatient?.assetId || "")
+                    .trim()
+                    .toLowerCase() === qrAssetId.toLowerCase()
+                ) {
+                  setPatientVerificationData(parsedPatient);
+                }
+              } catch {
+                // Ignore malformed local patient data.
+              }
+            }
 
+            setCurrentPage("vaccine-details");
+          })
+          .catch((backendError) => {
+            console.error(
+              "No registered asset found:",
+              qrAssetId,
+              backendError
+            );
+            setSelectedAsset(null);
+            setCurrentPage("verify-vaccine");
+          });
 
-      // Automatically select the newly created asset.
+        return;
+      }
 
-      setSelectedAsset(savedAsset);
+      // Get patient information
+      const savedPatient =
+        localStorage.getItem(
+          "vitalchain_patient_verification"
+        );
 
+      let parsedPatient = null;
 
-      // After creating the asset,
-      // go back to Assets page.
+      if (savedPatient) {
+        try {
+          parsedPatient =
+            JSON.parse(
+              savedPatient
+            );
+        } catch {
+          parsedPatient = null;
+        }
+      }
 
-      setCurrentPage("assets");
+      if (
+        parsedPatient &&
+        String(
+          parsedPatient.assetId ||
+          ""
+        )
+          .trim()
+          .toLowerCase() ===
+          qrAssetId.toLowerCase()
+      ) {
+        setPatientVerificationData(
+          parsedPatient
+        );
+      }
 
+      setSelectedAsset(
+        matchedAsset
+      );
+
+      setCurrentPage(
+        "vaccine-details"
+      );
     } catch (error) {
-
       console.error(
-        "Error creating asset:",
+        "Error opening traceability page:",
         error
       );
 
-    }
-
-  };
-
-
-  // =========================================================
-  // OPEN ASSET DETAILS
-  // (now fetches full detail from the backend instead of
-  // only using whatever data the list already had)
-  // =========================================================
-
-  const handleAssetClick = async (asset) => {
-
-    try {
-
-      const res = await fetch(
-        `${API_URL}/assets/${asset.id}/status`
+      setCurrentPage(
+        "verify-vaccine"
       );
-
-      if (!res.ok) {
-
-        // fallback to whatever data we already have
-        setSelectedAsset(asset);
-
-      } else {
-
-        const fullAsset = await res.json();
-        setSelectedAsset(fullAsset);
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        "Error fetching asset details:",
-        error
-      );
-
-      setSelectedAsset(asset);
-
     }
-
-
-    // Open the dynamic details page.
-
-    setCurrentPage("asset-details");
-
-  };
-
+  }, [assets]);
 
   // =========================================================
-  // LOGIN PAGE
+  // PUBLIC VERIFY PAGE
   // =========================================================
 
-  if (!isLoggedIn) {
+  /*
+    THIS IS THE IMPORTANT PART.
 
+    These URLs now open VerifyVaccine:
+
+    /verify?medId=zero33%2F3
+
+    /verify-vaccine?medId=zero33%2F3
+  */
+
+  if (
+    currentPage ===
+    "verify-vaccine"
+  ) {
     return (
-
-      <Login
-        onLogin={() => {
-          setIsLoggedIn(true);
-          setCurrentPage("dashboard");
-        }}
+      <VerifyVaccine
+        onVerify={
+          handleVaccineVerification
+        }
       />
-
     );
-
   }
 
-
   // =========================================================
-  // DASHBOARD PAGE
-  // =========================================================
-
-  if (currentPage === "dashboard") {
-
-    return (
-
-      <Dashboard
-        onAssetsClick={() => {
-          setCurrentPage("assets");
-        }}
-      />
-
-    );
-
-  }
-
-
-  // =========================================================
-  // ASSETS PAGE
-  // =========================================================
-
-  if (currentPage === "assets") {
-
-    return (
-
-      <Assets
-
-        // Send all assets to Assets.jsx
-        assets={assets}
-
-
-        // Dashboard button
-        onDashboardClick={() => {
-          setCurrentPage("dashboard");
-        }}
-
-
-        // Add New Asset button
-        onAddAssetClick={() => {
-          setCurrentPage("new-asset");
-        }}
-
-
-        // When an asset is clicked
-        onAssetClick={handleAssetClick}
-
-      />
-
-    );
-
-  }
-
-
-  // =========================================================
-  // NEW ASSET PAGE
-  // =========================================================
-
-  if (currentPage === "new-asset") {
-
-    return (
-
-      <NewAsset
-
-        // Cancel / Back button
-        onCancel={() => {
-          setCurrentPage("assets");
-        }}
-
-
-        // Create Asset button
-        onCreateAsset={handleCreateAsset}
-
-      />
-
-    );
-
-  }
-
-
-  // =========================================================
-  // ASSET DETAILS PAGE
+  // PUBLIC VACCINE TRACEABILITY
   // =========================================================
 
   if (
-    currentPage === "asset-details" &&
+    currentPage ===
+      "vaccine-details" &&
     selectedAsset
   ) {
-
     return (
+      <VaccineTraceability
+        asset={
+          selectedAsset
+        }
 
-      <AssetDetails
+        patient={
+          patientVerificationData
+        }
 
-        // VERY IMPORTANT
-        // Send the clicked asset to AssetDetails.jsx
-
-        asset={selectedAsset}
-
-
-        // Back to Assets
         onBackToAssets={() => {
-          setCurrentPage("assets");
+          setCurrentPage(
+            "verify-vaccine"
+          );
         }}
 
-
-        // Dashboard
         onDashboardClick={() => {
-          setCurrentPage("dashboard");
+          setCurrentPage(
+            "verify-vaccine"
+          );
         }}
-
       />
-
     );
-
   }
 
+  // =========================================================
+  // ADMIN LOGIN
+  // =========================================================
+
+  if (!isLoggedIn) {
+    return (
+      <Login
+        onLogin={() => {
+          setIsLoggedIn(true);
+
+          setCurrentPage(
+            "dashboard"
+          );
+        }}
+      />
+    );
+  }
+
+  // =========================================================
+  // DASHBOARD
+  // =========================================================
+
+  if (
+    currentPage ===
+    "dashboard"
+  ) {
+    return (
+      <Dashboard
+        onAssetsClick={() => {
+          setCurrentPage(
+            "assets"
+          );
+        }}
+      />
+    );
+  }
+
+  // =========================================================
+  // ASSETS
+  // =========================================================
+
+  if (
+    currentPage ===
+    "assets"
+  ) {
+    return (
+      <Assets
+        assets={assets}
+
+        onDashboardClick={() => {
+          setCurrentPage(
+            "dashboard"
+          );
+        }}
+
+        onAddAssetClick={() => {
+          setCurrentPage(
+            "new-asset"
+          );
+        }}
+
+        onAssetClick={
+          handleAssetClick
+        }
+      />
+    );
+  }
+
+  // =========================================================
+  // NEW ASSET
+  // =========================================================
+
+  if (
+    currentPage ===
+    "new-asset"
+  ) {
+    return (
+      <NewAsset
+        onCancel={() => {
+          setCurrentPage(
+            "assets"
+          );
+        }}
+
+        onCreateAsset={
+          handleCreateAsset
+        }
+
+        onPayNow={(asset) => {
+          setSelectedAsset(
+            asset
+          );
+
+          setCurrentPage(
+            "wallet"
+          );
+        }}
+      />
+    );
+  }
+
+  // =========================================================
+  // ASSET DETAILS
+  // =========================================================
+
+  if (
+    currentPage ===
+      "asset-details" &&
+    selectedAsset
+  ) {
+    return (
+      <AssetDetails
+        asset={
+          selectedAsset
+        }
+
+        onBackToAssets={() => {
+          setCurrentPage(
+            "assets"
+          );
+        }}
+
+        onDashboardClick={() => {
+          setCurrentPage(
+            "dashboard"
+          );
+        }}
+
+        onPayNow={
+          handlePayNow
+        }
+      />
+    );
+  }
+
+  // =========================================================
+  // WALLET
+  // =========================================================
+
+  if (
+    currentPage ===
+    "wallet"
+  ) {
+    return (
+      <Wallet
+        selectedAsset={
+          selectedAsset
+        }
+
+        onDashboardClick={() => {
+          setCurrentPage(
+            "dashboard"
+          );
+        }}
+
+        onAssetsClick={() => {
+          setCurrentPage(
+            "assets"
+          );
+        }}
+
+        onSendClick={
+          handleSend
+        }
+      />
+    );
+  }
+
+  // =========================================================
+  // SEND
+  // =========================================================
+
+  if (
+    currentPage ===
+    "send"
+  ) {
+    return (
+      <Send
+        selectedAsset={
+          selectedAsset
+        }
+
+        onBack={() => {
+          setCurrentPage(
+            "wallet"
+          );
+        }}
+
+        onDashboardClick={() => {
+          setCurrentPage(
+            "dashboard"
+          );
+        }}
+
+        onAssetsClick={() => {
+          setCurrentPage(
+            "assets"
+          );
+        }}
+
+        onConfirmOrder={
+          handleConfirmOrder
+        }
+      />
+    );
+  }
+
+  // =========================================================
+  // CONFIRM ORDER
+  // =========================================================
+
+  if (
+    currentPage ===
+      "confirm-order" &&
+    confirmOrderData
+  ) {
+    return (
+      <ConfirmOrder
+        paymentData={
+          confirmOrderData
+        }
+
+        selectedAsset={
+          confirmOrderData.selectedAsset ||
+          selectedAsset
+        }
+
+        onBack={() => {
+          setCurrentPage(
+            "send"
+          );
+        }}
+
+        onConfirm={(
+          confirmedAsset
+        ) => {
+          handlePaymentSuccess(
+            confirmedAsset ||
+              confirmOrderData.selectedAsset ||
+              selectedAsset
+          );
+        }}
+      />
+    );
+  }
 
   // =========================================================
   // FALLBACK
   // =========================================================
 
-  return null;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="text-center">
 
+        <h1 className="text-2xl font-bold text-slate-900">
+          Page Not Found
+        </h1>
+
+        <button
+          onClick={() => {
+            setCurrentPage(
+              "dashboard"
+            );
+          }}
+          className="
+            mt-4
+            rounded-lg
+            bg-blue-600
+            px-5
+            py-2
+            font-semibold
+            text-white
+            transition
+            hover:bg-blue-700
+          "
+        >
+          Go to Dashboard
+        </button>
+
+      </div>
+    </div>
+  );
 }
-
 
 export default App;

@@ -73,16 +73,30 @@ class Blockchain:
     def get_asset_history(self, asset_id: str) -> list[dict]:
         return [b.to_dict() for b in self.chain if b.data.get("asset_id") == asset_id]
 
+    def _chain_path(self, path: str = "chain.json") -> str:
+        if os.path.isabs(path):
+            return path
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), path)
+
     def save_chain(self, path: str = "chain.json"):
+        path = self._chain_path(path)
         with open(path, "w") as f:
             json.dump([b.to_dict() for b in self.chain], f, indent=2)
 
     def load_chain(self, path: str = "chain.json"):
-        if not os.path.exists(path):
+        path = self._chain_path(path)
+        if not os.path.exists(path) or os.path.getsize(path) == 0:
             return
-        with open(path, "r") as f:
-            raw = json.load(f)
-        self.chain = [Block.from_dict(b) for b in raw]
+        try:
+            with open(path, "r") as f:
+                raw = json.load(f)
+            if not isinstance(raw, list) or not raw:
+                return
+            self.chain = [Block.from_dict(b) for b in raw]
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+            # A missing/empty/corrupt chain starts clean with the genesis block.
+            self.chain = [self._create_genesis_block()]
+            self.save_chain(path)
 
     def verify_asset(self, asset_id: str, current_snapshot_by_event_type: dict) -> dict:
         """

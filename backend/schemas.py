@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date
 
@@ -28,8 +28,35 @@ class AssetCreate(BaseModel):
 class EventCreate(BaseModel):
     event_type: str
     org: str
-    detail: dict = {}
+    detail: dict = Field(default_factory=dict)
 
 
 class TempReading(BaseModel):
     temperature: float
+
+
+class VaccinationRegister(BaseModel):
+    full_name: str
+    phone: str
+    asset_id: str
+    hospital: Optional[str] = "VITALChain Hospital"
+
+
+class PaymentOrderCreate(BaseModel):
+    asset_id: Optional[str] = None
+    amount_usdc: str = "0.01"
+    recipient: Optional[str] = None
+    network: Optional[str] = None
+
+
+class PaymentReceipt(BaseModel):
+    transaction_hash: Optional[str] = None
+    payer: Optional[str] = None
+    network: Optional[str] = None
+    success: bool = True
+    raw: Optional[dict] = None
+
+
+class RevocationCreate(BaseModel):
+    reason: str = Field(min_length=3, max_length=500)
+    revoked_by: Optional[str] = "VITALChain Hospital"
