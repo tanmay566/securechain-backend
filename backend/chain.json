@@ -43,5 +43,29 @@
     },
     "prev_hash": "d85160d7cf437094cb491b3a77b3fa36feae68d6aa1267bf5cae31a719dc17c1",
     "hash": "9e04b1b3b2394c2f68382de7921f70f6de0da5846c25d3fe973f9e8023539319"
+  },
+  {
+    "index": 4,
+    "timestamp": 1786356412.8586457,
+    "data": {
+      "asset_id": "TREN-3321",
+      "event_type": "ASSET_REGISTERED",
+      "org": "A",
+      "record_hash": "56e69c6a0a6d0d1b176bc5b56c7815e7a3891603373d7ae412365b869dbf77df"
+    },
+    "prev_hash": "9e04b1b3b2394c2f68382de7921f70f6de0da5846c25d3fe973f9e8023539319",
+    "hash": "128c67737a9d3d5a758c6f2d4c46effa39c897df7cb5838ec326d119ea4eb3de"
+  },
+  {
+    "index": 5,
+    "timestamp": 1786357827.5794759,
+    "data": {
+      "asset_id": "demo",
+      "event_type": "ASSET_REGISTERED",
+      "org": "demo",
+      "record_hash": "dfa1d74eb95b30cebdd3b8f68474e6f82120b7b78efbd9f351f309a79cc194e3"
+    },
+    "prev_hash": "128c67737a9d3d5a758c6f2d4c46effa39c897df7cb5838ec326d119ea4eb3de",
+    "hash": "bfd742b17b5661440caa8b6246294b89ecb1f3ca97b1d60197e4d519aa8f6a4f"
   }
 ]
