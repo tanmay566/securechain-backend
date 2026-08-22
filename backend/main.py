@@ -134,7 +134,7 @@ def dashboard_stats(db: Session = Depends(get_db)):
     }
 
 
-@app.post("/assets/register")
+@app.post("/assets/register", status_code=201)
 def create_asset(asset: schemas.AssetCreate, db: Session = Depends(get_db)):
     existing = db.query(models.Asset).filter(models.Asset.asset_id == asset.asset_id).first()
     if existing:
@@ -378,7 +378,7 @@ def get_vaccination(vaccination_id: str, db: Session = Depends(get_db)):
     return vaccination_to_shape(row, patient, asset)
 
 
-@app.post("/assets/{asset_id:path}/revoke")
+@app.post("/assets/{asset_id:path}/revoke",status_code=203)
 def revoke_asset(asset_id: str, data: schemas.RevocationCreate, db: Session = Depends(get_db)):
     asset = db.query(models.Asset).filter(models.Asset.asset_id == asset_id).first()
     if not asset:
@@ -407,7 +407,7 @@ def revoke_asset(asset_id: str, data: schemas.RevocationCreate, db: Session = De
     return get_asset_status(asset_id, db)
 
 
-@app.post("/payments/create")
+@app.post("/payments/create",status_code=201)
 def create_payment_order(order: schemas.PaymentOrderCreate, db: Session = Depends(get_db)):
     if order.asset_id:
         asset = db.query(models.Asset).filter(models.Asset.asset_id == order.asset_id).first()
